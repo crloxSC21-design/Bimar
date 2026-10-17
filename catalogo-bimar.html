@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BíMar · Menú y pedidos</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F3EF;--surface:#fff;--ink:#1C1A17;--muted:#5E5851;--line:#E2DDD5;--accent:#C2410C;--on-accent:#fff;--shadow:rgba(36,22,56,.18)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151311;--surface:#211E1B;--ink:#F6F1EA;--muted:#B8AFA4;--line:#352F29;--accent:#FF8A3D;--on-accent:#2B1405;--shadow:rgba(0,0,0,.5)}}
+:root[data-theme="dark"]{--bg:#151311;--surface:#211E1B;--ink:#F6F1EA;--muted:#B8AFA4;--line:#352F29;--accent:#FF8A3D;--on-accent:#2B1405;--shadow:rgba(0,0,0,.5)}
+*{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+:root{padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 "DM Sans",system-ui,sans-serif;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+button,input,textarea{font:inherit;color:inherit}
+header{padding:28px 20px 12px;max-width:760px;margin:0 auto}
+h1{font:800 clamp(2.4rem,11vw,3.8rem)/.95 "Bricolage Grotesque",sans-serif;margin:0 0 10px;letter-spacing:-.03em}
+header p{margin:0;color:var(--muted);max-width:34ch}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.pills{display:flex;gap:8px;overflow-x:auto;padding:12px 20px;max-width:760px;margin:0 auto;scrollbar-width:none}
+.pills button{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:8px 16px;cursor:pointer;font-weight:500}
+.pills button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{max-width:760px;margin:0 auto;padding:16px 20px}
+.item{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px;margin-bottom:12px}
+.tile{flex:none;width:68px;height:68px;border-radius:14px;display:grid;place-items:center;font-size:2.1rem}
+.info{flex:1;min-width:0}
+.info h3{margin:0;font-size:1rem;font-weight:700}
+.info p{margin:2px 0 6px;font-size:.88rem;color:var(--muted)}
+.price{font-weight:700}
+.add,.step button{border:0;cursor:pointer;border-radius:99px;background:var(--accent);color:var(--on-accent);font-weight:700}
+.add{padding:9px 16px}
+.step{display:flex;align-items:center;gap:4px}
+.step button{width:36px;height:36px;font-size:1.2rem;line-height:1}
+.step span{min-width:24px;text-align:center;font-weight:700}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.bar{position:fixed;left:0;right:0;bottom:0;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;pointer-events:none}
+.bar button{pointer-events:auto;width:100%;max-width:720px;display:flex;justify-content:space-between;align-items:center;border:0;border-radius:16px;padding:16px 20px;background:var(--accent);color:var(--on-accent);font-weight:700;cursor:pointer;box-shadow:0 8px 24px var(--shadow)}
+.bar button[hidden]{display:none}
+.sheet{position:fixed;inset:0;background:rgba(10,5,20,.55);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet[hidden]{display:none}
+.panel{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow-y:auto;border-radius:24px 24px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.panel{animation:none}}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.top h2{font:800 1.6rem "Bricolage Grotesque",sans-serif;margin:0}
+.close{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:8px 14px;cursor:pointer}
+.line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.line b{display:block}.line small{color:var(--muted)}
+.total{display:flex;justify-content:space-between;font:800 1.3rem "Bricolage Grotesque",sans-serif;padding:14px 0}
+label{display:block;font-weight:500;margin:12px 0 6px}
+input[type=text],textarea{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px}
+.opts{display:flex;gap:8px}
+.opts button{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px;cursor:pointer;font-weight:500}
+.opts button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);font-weight:700}
+.err{color:var(--accent);font-size:.9rem;min-height:1.3em;margin:8px 0 0}
+#send{display:block;text-align:center;text-decoration:none;background:#1FA855;color:#fff;font-weight:700;border-radius:14px;padding:15px;margin-top:6px}
+.empty{color:var(--muted);text-align:center;padding:24px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>BíMar</h1>
+  <p>Desayunos, comidas y snacks en Tihuatlán. Abierto de 8 am a 10 pm. Elige y envía tu pedido por WhatsApp.</p>
+</header>
+<nav><div class="pills" id="pills"></div></nav>
+<main id="list"></main>
+<div class="bar"><button id="open" hidden><span id="count"></span><span id="sum"></span></button></div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="ttl">
+    <div class="top"><h2 id="ttl">Tu pedido</h2><button class="close" id="close">Cerrar</button></div>
+    <div id="lines"></div>
+    <div class="total"><span>Total</span><span id="total"></span></div>
+    <label for="name">Tu nombre</label>
+    <input type="text" id="name" autocomplete="name" placeholder="Ej. Ana López">
+    <label>¿Cómo lo recibes?</label>
+    <div class="opts" id="opts">
+      <button type="button" aria-pressed="true" data-v="Paso a recoger">Paso a recoger</button>
+      <button type="button" aria-pressed="false" data-v="Envío a domicilio">Envío a domicilio</button>
+    </div>
+    <label for="notes">Notas (opcional)</label>
+    <textarea id="notes" rows="2" placeholder="Salsa, sin cebolla, dirección, hora…"></textarea>
+    <p class="err" id="err" role="alert"></p>
+    <a id="send" href="#" target="_blank" rel="noopener">Enviar pedido por WhatsApp</a>
+  </div>
+</div>
+
+<script>
+// ====== CONFIGURA AQUÍ ======
+// Número de WhatsApp del negocio con código de país, sin + ni espacios.
+var NUMERO = "527828866651";
+var CATEGORIAS = {Desayunos:"#FFE2B8", Antojitos:"#F7D3C4", Comidas:"#D9E8C9", Snacks:"#F3E0A0", Bebidas:"#CFE8F5"};
+var RAW = [
+// cat, emoji, nombre, descripción, precio
+["Desayunos","🍳","Desayuno americano","Huevos revueltos con tocino o jamón, frijoles, salsa y tortillas. Incluye jugo o fruta y café de refil (8 am a 12 pm)",80],
+["Desayunos","🥓","Desayuno continental","2 pan tostado con mermelada, 2 huevos estrellados y tocino. Incluye jugo o fruta y café de refil (8 am a 12 pm)",90],
+["Desayunos","🥑","Desayuno mexicano","Chilaquiles verdes con cecina, crema, queso, cebolla, aguacate y frijoles. Incluye jugo o fruta y café de refil (8 am a 12 pm)",110],
+["Desayunos","🍽️","Desayuno BíMar","Cecina con 2 picadas (1 verde, 1 roja), plátanos fritos y frijoles. Incluye jugo o fruta y café de refil (8 am a 12 pm)",120],
+["Desayunos","🍳","Huevos al gusto","Estrellados, a la mexicana, con jamón, salchicha, chorizo o revueltos. Con frijoles y tortillas",75],
+["Desayunos","🍳","Huevos rancheros","2 huevos estrellados sobre tortilla frita con jamón y salsa roja. Con frijoles y tortillas",80],
+["Desayunos","🌶️","Chilaquiles de pollo o huevo","Salsa verde, roja o morita, con crema, queso, cebolla, aguacate y frijoles",77],
+["Desayunos","🌶️","Chilaquiles con pechuga a la plancha","Salsa verde, roja o morita, con crema, queso, cebolla, aguacate y frijoles",85],
+["Desayunos","🌶️","Chilaquiles con cecina","Salsa verde, roja o morita, con crema, queso, cebolla, aguacate y frijoles",90],
+["Desayunos","🌮","Enchiladas de pollo o huevo","Salsa verde, roja o morita, con crema, queso, cebolla, aguacate y frijoles",75],
+["Desayunos","🌮","Enchiladas con pechuga a la plancha","Salsa verde, roja o morita, con crema, queso, cebolla, aguacate y frijoles",80],
+["Desayunos","🌮","Enchiladas con cecina","Salsa verde, roja o morita, con crema, queso, cebolla, aguacate y frijoles",88],
+["Desayunos","🥘","Estrujada de pollo o huevo","Salsa verde, roja o morita, con crema, queso, cebolla y aguacate",77],
+["Desayunos","🥘","Estrujada con pechuga a la plancha","Salsa verde, roja o morita, con crema, queso, cebolla y aguacate",85],
+["Desayunos","🥘","Estrujada con cecina","Salsa verde, roja o morita, con crema, queso, cebolla y aguacate",90],
+["Desayunos","🥚","Omelette","Relleno de queso de hebra con jamón o tocino. Con frijoles, salsa y tortillas",98],
+["Desayunos","🥞","Hotcakes","3 piezas con tocino o salchicha",90],
+["Desayunos","🍞","Pan tostado","3 piezas con mantequilla y mermelada",47],
+["Desayunos","🥐","Bisquets","Con mantequilla y mermelada",15],
+["Desayunos","🍌","Plátanos fritos","2 plátanos con crema y queso",65],
+["Desayunos","🍉","Orden de fruta","Fruta de temporada",65],
+["Desayunos","🥣","Fruta con granola","Con yogurt y miel",90],
+["Antojitos","🌮","Tacos dorados de pollo","5 piezas con crema, queso, aguacate, cebolla, lechuga y frijoles. Salsa aparte",70],
+["Antojitos","🫓","Empanadas o molotes","5 piezas de pollo o queso, con crema, queso, aguacate y frijoles",77],
+["Antojitos","🧀","Quesadillas","5 piezas con queso de hebra y pollo o chorizo",70],
+["Antojitos","🫓","Bocoles","5 piezas de chorizo, pollo, huevo o queso, con ensalada y frijol",80],
+["Comidas","🥑","Guacamole","Con tortillas",85],
+["Comidas","🧀","Queso fundido","Natural, con chorizo o con champiñones. Con salsa y tortillas de harina",90],
+["Comidas","🍲","Consomé de pollo","Pollo deshebrado, arroz, jitomate, chile y cebolla. Con tortillas hechas a mano",70],
+["Comidas","🍲","Caldo ranchero","Pollo deshebrado, arroz, verduras, aguacate y chile chipotle. Con tortillas hechas a mano",85],
+["Comidas","🥗","Ensalada César","Fajitas de pollo a la plancha, jitomate, lechuga, huevo duro, queso parmesano y aderezo",95],
+["Comidas","🥗","Ensalada caribeña","Fajitas de pollo empanizado, espinaca, lechuga, arándanos, manzana y aderezo de mostaza con miel",120],
+["Comidas","🍝","Espagueti carbonara","Tocino a la crema con queso parmesano",110],
+["Comidas","🍝","Espagueti alfredo","Champiñones y jamón a la crema con queso parmesano",110],
+["Comidas","🍤","Espagueti con camarones","Carbonara o alfredo",220],
+["Comidas","🍤","Camarones al gusto","Al chipotle, empanizado, a la diabla o al mojo de ajo. Con ensalada, arroz y enchiladas",220],
+["Comidas","🦐","Guatape de camarón","Caldo de camarón",150],
+["Comidas","🍤","Coctel de camarón mediano","",150],
+["Comidas","🍤","Coctel de camarón grande","",200],
+["Comidas","🌮","Enchiladas suizas","5 piezas rellenas de pollo, salsa verde, crema y queso mozzarella gratinado. Con ensalada",115],
+["Comidas","🥩","Arrachera","Con guacamole, papas a la francesa, frijoles, chiles toreados y cebolla asada. Con tortillas hechas a mano",190],
+["Comidas","🥩","Tampiqueña","Carne asada de res con guacamole, arroz, frijoles refritos, 2 enchiladas rojas y plátanos fritos",195],
+["Comidas","🌮","Tacos de arrachera","5 piezas con tortillas hechas a mano, guacamole, cebollas asadas y salsa",100],
+["Comidas","🐟","Filete de pescado empanizado","Con ensalada, arroz, salsa, tortillas hechas a mano y enchiladas",170],
+["Comidas","🍗","Pechuga a la plancha","Con arroz y verduras, tortillas hechas a mano",90],
+["Comidas","🍗","Pechuga empanizada","Con arroz, papas a la francesa y tortillas hechas a mano",95],
+["Snacks","🍔","Hamburguesa BíMar (grande)","Sirloin, tocino, queso de hebra, salchicha, queso amarillo, lechuga, jitomate y cebolla. Con papas a la francesa",100],
+["Snacks","🍔","Hamburguesa BíMar doble carne","Igual que la grande, con doble carne. Extra de piña $10 (indícalo en notas)",125],
+["Snacks","🍔","Hamburguesa tradicional (chica)","Carne de res, tocino, lechuga, cebolla y jitomate. Con papas a la francesa",70],
+["Snacks","🌭","Hot dog con papas","3 piezas con tocino y papas a la francesa",95],
+["Snacks","🌭","Hot dog por pieza","",28],
+["Snacks","🥪","Club sandwich","Pollo, jamón, tocino, lechuga, jitomate y cebolla. Con papas a la francesa",110],
+["Snacks","🍗","Nuggets","7 piezas con papas a la francesa",85],
+["Snacks","🍟","Papas a la francesa","",70],
+["Snacks","🍗","Alitas","BBQ, a la diabla o mango-habanero",100],
+["Bebidas","🍓","Licuado de fresa","",40],
+["Bebidas","🍎","Licuado de avena con manzana","",40],
+["Bebidas","🍌","Licuado de papaya o plátano","",35],
+["Bebidas","🥛","Chocomilk","",35],
+["Bebidas","☕","Café americano","",30],
+["Bebidas","🥣","Avena caliente","",45],
+["Bebidas","🍫","Chocolate caliente","",45],
+["Bebidas","🍵","Té","",18],
+["Bebidas","🥤","Refresco","",30],
+["Bebidas","💧","Botella de agua","",18],
+["Bebidas","🍹","Agua fresca (vaso)","Jamaica, limón, papaya, guayaba o melón",18],
+["Bebidas","🍹","Agua fresca (jarra 2 litros)","Jamaica, limón, papaya, guayaba o melón",75],
+["Bebidas","🍹","Agua de 2 ingredientes (vaso)","Jamaica con fresa o pepino con limón",23],
+["Bebidas","🍹","Agua de 2 ingredientes (jarra 2 litros)","Jamaica con fresa o pepino con limón",85]
+];
+var PRODUCTOS = RAW.map(function(r,i){return {id:i+1, cat:r[0], e:r[1], n:r[2], d:r[3], p:r[4]}});
+// ============================
+var cat = "Todo", cart = {}, entrega = "Paso a recoger";
+var $ = function(id){return document.getElementById(id)};
+var money = function(n){return "$" + n.toLocaleString("es-MX")};
+var byId = function(id){return PRODUCTOS.filter(function(x){return x.id==id})[0]};
+
+function pills(){
+  $("pills").innerHTML = ["Todo"].concat(Object.keys(CATEGORIAS)).map(function(c){
+    return '<button data-cat="'+c+'" aria-pressed="'+(c==cat)+'">'+c+'</button>';
+  }).join("");
+}
+function list(){
+  var items = PRODUCTOS.filter(function(x){return cat=="Todo"||x.cat==cat});
+  $("list").innerHTML = items.map(function(x){
+    var q = cart[x.id]||0;
+    var ctl = q ? '<div class="step"><button data-d="-1" data-id="'+x.id+'" aria-label="Quitar uno">−</button><span>'+q+'</span><button data-d="1" data-id="'+x.id+'" aria-label="Agregar uno">+</button></div>'
+                : '<button class="add" data-d="1" data-id="'+x.id+'">Agregar</button>';
+    return '<div class="item"><div class="tile" style="background:'+CATEGORIAS[x.cat]+'">'+x.e+'</div><div class="info"><h3>'+x.n+'</h3>'+(x.d?'<p>'+x.d+'</p>':'')+'<span class="price">'+money(x.p)+'</span></div>'+ctl+'</div>';
+  }).join("");
+}
+function totals(){
+  var n=0,t=0;
+  for(var id in cart){n+=cart[id];t+=cart[id]*byId(id).p}
+  return {n:n,t:t};
+}
+function bar(){
+  var s = totals();
+  $("open").hidden = !s.n;
+  $("count").textContent = "Ver pedido (" + s.n + (s.n==1?" producto)":" productos)");
+  $("sum").textContent = money(s.t);
+}
+function lines(){
+  var ids = Object.keys(cart);
+  $("lines").innerHTML = ids.length ? ids.map(function(id){
+    var x = byId(id), q = cart[id];
+    return '<div class="line"><div><b>'+x.n+'</b><small>'+money(x.p)+' c/u</small></div><div class="step"><button data-d="-1" data-id="'+id+'" aria-label="Quitar uno">−</button><span>'+q+'</span><button data-d="1" data-id="'+id+'" aria-label="Agregar uno">+</button></div></div>';
+  }).join("") : '<p class="empty">Tu pedido está vacío. Agrega productos del catálogo.</p>';
+  $("total").textContent = money(totals().t);
+}
+function change(id,d){
+  cart[id] = (cart[id]||0) + d;
+  if(cart[id]<=0) delete cart[id];
+  list(); bar(); lines();
+  if(!Object.keys(cart).length) $("sheet").hidden = true;
+}
+function message(){
+  var s = totals();
+  var rows = Object.keys(cart).map(function(id){
+    var x = byId(id);
+    return cart[id]+" x "+x.n+" – "+money(cart[id]*x.p);
+  });
+  var notes = $("notes").value.trim();
+  return "Hola, quiero hacer un pedido:\n\n"+rows.join("\n")+"\n\nTotal: "+money(s.t)+
+    "\nNombre: "+$("name").value.trim()+"\nEntrega: "+entrega+(notes?"\nNotas: "+notes:"");
+}
+
+document.addEventListener("click", function(e){
+  var b = e.target.closest("button"); if(!b) return;
+  if(b.dataset.cat){cat=b.dataset.cat; pills(); list();}
+  else if(b.dataset.id){change(b.dataset.id, +b.dataset.d);}
+  else if(b.id=="open"){lines(); $("sheet").hidden=false;}
+  else if(b.id=="close"){$("sheet").hidden=true;}
+  else if(b.dataset.v){
+    entrega=b.dataset.v;
+    [].forEach.call($("opts").children, function(o){o.setAttribute("aria-pressed", o==b)});
+  }
+});
+$("sheet").addEventListener("click", function(e){ if(e.target==this) this.hidden=true; });
+document.addEventListener("keydown", function(e){ if(e.key=="Escape") $("sheet").hidden=true; });
+$("send").addEventListener("click", function(e){
+  if(!$("name").value.trim()){
+    e.preventDefault();
+    $("err").textContent = "Escribe tu nombre para enviar el pedido.";
+    $("name").focus(); return;
+  }
+  $("err").textContent = "";
+  var base = NUMERO.indexOf("X")>-1 ? "https://wa.me/" : "https://wa.me/"+NUMERO;
+  this.href = base + "?text=" + encodeURIComponent(message());
+});
+pills(); list(); bar();
+</script>
+</body>
+</html>
